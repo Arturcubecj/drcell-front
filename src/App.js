@@ -1,10 +1,11 @@
 import './App.css';
-
+import AdminLayout from './components/admin/layout/AdminLayout';
+import Dashboard from './components/admin/pages/DashboardAdmin';
 function App() {
   return (
-    <div className="App">
-      <h1>Pagina de Dr. Cell</h1>
-    </div>
+    <AdminLayout>
+      <Dashboard />
+    </AdminLayout>
   );
 }
 
