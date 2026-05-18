@@ -1,15 +1,15 @@
-import { Box, Grid, Button } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import BuildIcon       from '@mui/icons-material/Build';
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import InventoryIcon   from '@mui/icons-material/Inventory';
 import AddIcon         from '@mui/icons-material/Add';
-import MetricCard from '../../Metricas';
-import DataTable  from '../../DataTable';
 
-import { colors, primaryBtn } from '../../../utils/styles';
+import MetricCard    from '../../Metricas';
+import DataTable     from '../../DataTable';
+import ActionButton  from '../../Boton';
+import { colors }    from '../../../utils/styles';
 
-// ── Datos de ejemplo (luego vendrán del backend) ───────────────
 const reparaciones = [
   { codigo: '#REP-1048', cliente: 'Carlos Vega',  equipo: 'iPhone 14 Pro', tecnico: 'Luis T.',     estado: 'En reparación' },
   { codigo: '#REP-1047', cliente: 'Ana Morales',  equipo: 'Samsung S23',   tecnico: 'Pedro G.',    estado: 'Lista' },
@@ -18,16 +18,17 @@ const reparaciones = [
   { codigo: '#REP-1044', cliente: 'Roberto Loor', equipo: 'iPhone 13',     tecnico: 'Pedro G.',    estado: 'En reparación' },
 ];
 
-const Dashboard = () => {
+const DashboardAdmin = () => {
   return (
     <Box>
       {/* Botón nueva reparación */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
-        <Button variant="contained" startIcon={<AddIcon />} sx={primaryBtn}>
-          Nueva reparación
-        </Button>
+        <ActionButton
+          label="Nueva reparación"
+          icon={<AddIcon />}
+          onClick={() => {}}
+        />
       </Box>
-
       {/* Métricas */}
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={3}>
@@ -47,22 +48,21 @@ const Dashboard = () => {
             subColor={colors.warning} icon={<InventoryIcon />} />
         </Grid>
       </Grid>
-
       {/* Tabla reparaciones recientes */}
-      <Box sx={{mt:10}}>
-      <DataTable
-        title="Reparaciones recientes"
-        action={{ label: 'Ver todas', onClick: () => {} }}
-        columns={['Código', 'Cliente', 'Equipo', 'Técnico', 'Estado']}
-        columnKeys={['codigo', 'cliente', 'equipo', 'tecnico', 'estado']}
-        rows={reparaciones}
-        codeKey="codigo"
-        nameKey="cliente"
-        statusKey="estado"
-      />
+      <Box sx={{ mt: 3 }}>
+        <DataTable
+          title="Reparaciones recientes"
+          action={{ label: 'Ver todas', onClick: () => {} }}
+          columns={['Código', 'Cliente', 'Equipo', 'Técnico', 'Estado']}
+          columnKeys={['codigo', 'cliente', 'equipo', 'tecnico', 'estado']}
+          rows={reparaciones}
+          codeKey="codigo"
+          nameKey="cliente"
+          statusKey="estado"
+        />
       </Box>
     </Box>
   );
 };
 
-export default Dashboard;
+export default DashboardAdmin;

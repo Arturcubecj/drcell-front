@@ -3,6 +3,7 @@ import AdminLayout      from './components/admin/layout/AdminLayout';
 import TecnicoLayout    from './components/tecnico/layout/TecnicoLayout';
 import DashboardAdmin   from './components/admin/pages/DashboardAdmin';
 import DashboardTecnico from './components/tecnico/pages/DashboardTecnico';
+import ReparacionesAdmin from './components/admin/pages/ReparacionesAdmin';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <AdminLayout>
           <Routes>
             <Route path="dashboard" element={<DashboardAdmin />} />
+            <Route path="reparaciones" element={<ReparacionesAdmin />} />
             <Route path="*" element={<Navigate to="dashboard" />} />
           </Routes>
         </AdminLayout>

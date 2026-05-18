@@ -4,19 +4,19 @@ import {
 } from '@mui/material';
 import { colors, cardStyle, tableHeadCell, tableCellBase } from '../utils/styles';
 import StatusChip from './StatusChip';
-import { render } from '@testing-library/react';
+
 /**
  * DataTable — tabla genérica reutilizable
- *
  * Props:
- * - title: string — título del panel
- * - action: { label, onClick } — enlace opcional en la esquina derecha
- * - columns: string[] — nombres de las columnas
- * - rows: object[] — filas de datos
- * - columnKeys: string[] — keys del objeto que corresponden a cada columna
- * - statusKey: string — key que contiene el estado (para renderizar StatusChip)
- * - codeKey: string — key que contiene el código (para darle estilo monospace)
- * - nameKey: string — key que contiene el nombre principal (para resaltarlo)
+ * - title: string
+ * - action: { label, onClick } — enlace opcional esquina derecha
+ * - columns: string[]
+ * - rows: object[]
+ * - columnKeys: string[]
+ * - statusKey: string — key del estado (renderiza StatusChip)
+ * - codeKey: string — key del código (monospace azul)
+ * - nameKey: string — key del nombre (resaltado)
+ * - renderAction: (row) => JSX — botones de acción por fila
  */
 const DataTable = ({
   title,
@@ -28,7 +28,6 @@ const DataTable = ({
   codeKey = 'codigo',
   nameKey = 'cliente',
   renderAction,
-
 }) => {
   return (
     <Paper sx={cardStyle}>
@@ -41,10 +40,8 @@ const DataTable = ({
           {title}
         </Typography>
         {action && (
-          <Typography
-            onClick={action.onClick}
-            sx={{ fontSize: 11, color: colors.primary, cursor: 'pointer' }}
-          >
+          <Typography onClick={action.onClick}
+            sx={{ fontSize: 11, color: colors.primary, cursor: 'pointer' }}>
             {action.label}
           </Typography>
         )}
@@ -64,12 +61,10 @@ const DataTable = ({
             {rows.map((row, i) => (
               <TableRow key={i} sx={{ '&:last-child td': { border: 0 } }}>
                 {columnKeys.map((key) => {
-
-                  // Celda de acción 
-
+                  // Celda de acción → renderAction
                   if (key === 'accion') {
                     return (
-                      <TableCell key={key} sx={tableCellBase}>
+                      <TableCell key={key} sx={{ borderColor: colors.borderLight, py: 1 }}>
                         {renderAction ? renderAction(row) : null}
                       </TableCell>
                     );
@@ -77,7 +72,7 @@ const DataTable = ({
                   // Celda de estado → StatusChip
                   if (key === statusKey) {
                     return (
-                      <TableCell key={key} sx={{ borderColor: colors.borderLight }}>
+                      <TableCell key={key} sx={{ borderColor: colors.borderLight, py: 1, verticalAlign: 'middle' }}>
                         <StatusChip label={row[key]} />
                       </TableCell>
                     );
