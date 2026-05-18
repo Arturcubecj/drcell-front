@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { colors, cardStyle, tableHeadCell, tableCellBase } from '../utils/styles';
 import StatusChip from './StatusChip';
+import { render } from '@testing-library/react';
 /**
  * DataTable — tabla genérica reutilizable
  *
@@ -26,6 +27,8 @@ const DataTable = ({
   statusKey = 'estado',
   codeKey = 'codigo',
   nameKey = 'cliente',
+  renderAction,
+
 }) => {
   return (
     <Paper sx={cardStyle}>
@@ -61,6 +64,16 @@ const DataTable = ({
             {rows.map((row, i) => (
               <TableRow key={i} sx={{ '&:last-child td': { border: 0 } }}>
                 {columnKeys.map((key) => {
+
+                  // Celda de acción 
+
+                  if (key === 'accion') {
+                    return (
+                      <TableCell key={key} sx={tableCellBase}>
+                        {renderAction ? renderAction(row) : null}
+                      </TableCell>
+                    );
+                  }
                   // Celda de estado → StatusChip
                   if (key === statusKey) {
                     return (
