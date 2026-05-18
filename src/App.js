@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import AdminLayout from './Components/admin/layout/AdminLayout';
-import TecnicoLayout from './Components/tecnico/layout/tecnicoLayout';
-import DashboardAdmin from './Components/admin/pages/DashboardAdmin';
-import DashboardTecnico from './Components/tecnico/pages/dashboardTecnico';
+import AdminLayout from './components/admin/layout/AdminLayout';
+import TecnicoLayout from './components/tecnico/layout/tecnicoLayout';
+import DashboardAdmin from './components/admin/pages/DashboardAdmin';
+import DashboardTecnico from './components/tecnico/pages/dashboardTecnico';
 
 function App() {
   return (
