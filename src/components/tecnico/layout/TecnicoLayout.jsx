@@ -5,14 +5,9 @@ import {
   Badge, Avatar, Chip
 } from '@mui/material';
 import DashboardIcon     from '@mui/icons-material/Dashboard';
-import BuildIcon         from '@mui/icons-material/Build';
-import PeopleIcon        from '@mui/icons-material/People';
-import InventoryIcon     from '@mui/icons-material/Inventory';
-import EngineeringIcon   from '@mui/icons-material/Engineering';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
 import { colors } from '../../../utils/styles';
-import { Outlet } from "react-router-dom";
 
 const DRAWER_WIDTH = 230;
 
@@ -20,7 +15,7 @@ const navItems = [
   { label: 'Mis Reparaciones',    icon: <DashboardIcon />,  path: '/tecnico/dashboard' },
 ];
 
-const AdminLayout = ({ children }) => {
+const TecnicoLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -158,7 +153,7 @@ const AdminLayout = ({ children }) => {
         </AppBar>
         {/* Contenido */}
         <Box sx={{ flex: 1, overflow: 'auto', bgcolor: colors.bg, p: 3 }}>
-          <Outlet />
+          {children}
         </Box>
 
       </Box>
@@ -166,4 +161,4 @@ const AdminLayout = ({ children }) => {
   );
 };
 
-export default AdminLayout;
+export default TecnicoLayout;

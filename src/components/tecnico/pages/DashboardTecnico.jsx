@@ -1,10 +1,9 @@
 import React from "react";
-import {Box,Typography,Grid,Card,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,Button
+import {Box,Grid,Button
 } from "@mui/material";
 import DataTable  from "../../DataTable";
-import { colors, cardStyle, tableHeadCell, tableCellBase } from "../../../utils/styles";
-import MetricCard from './../../Metricas';
-import { render } from '@testing-library/react';
+import { colors } from "../../../utils/styles";
+import MetricCard from '../../Metricas';
 
 function DashboardTecnico() {
 
