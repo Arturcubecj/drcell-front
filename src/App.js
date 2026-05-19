@@ -4,6 +4,9 @@ import TecnicoLayout    from './components/tecnico/layout/TecnicoLayout';
 import DashboardAdmin   from './components/admin/pages/DashboardAdmin';
 import DashboardTecnico from './components/tecnico/pages/DashboardTecnico';
 import ReparacionesAdmin from './components/admin/pages/ReparacionesAdmin';
+import ClientesAdmin from './components/admin/pages/ClientesAdmin';
+import RepuestosAdmin from './components/admin/pages/RepuestosAdmin';
+import TecnicosAdmin from './components/admin/pages/TecnicosAdmin';
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
           <Routes>
             <Route path="dashboard" element={<DashboardAdmin />} />
             <Route path="reparaciones" element={<ReparacionesAdmin />} />
+            <Route path="clientes" element={<ClientesAdmin />} />
+            <Route path="repuestos" element={<RepuestosAdmin />} />
+            <Route path="tecnicos" element={<TecnicosAdmin />} />
             <Route path="*" element={<Navigate to="dashboard" />} />
           </Routes>
         </AdminLayout>
