@@ -19,7 +19,7 @@ function App() {
             <Route path="dashboard" element={<DashboardAdmin />} />
             <Route path="reparaciones" element={<ReparacionesAdmin />} />
             <Route path="clientes" element={<ClientesAdmin />} />
-            <Route path="repuestos" element={<RepuestosAdmin />} />
+            <Route path="repuestos" element={<RepuestosAdmin />} /> 
             <Route path="tecnicos" element={<TecnicosAdmin />} />
             <Route path="*" element={<Navigate to="dashboard" />} />
           </Routes>
