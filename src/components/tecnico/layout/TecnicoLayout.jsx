@@ -2,11 +2,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, AppBar, Toolbar, IconButton,
-  Badge, Avatar, Chip
+  Badge, Avatar, Chip, Tooltip
 } from '@mui/material';
 import DashboardIcon     from '@mui/icons-material/Dashboard';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { colors } from '../../../utils/styles';
 
 const DRAWER_WIDTH = 230;
@@ -117,6 +118,10 @@ const TecnicoLayout = ({ children }) => {
           p: 2, borderTop: `0.5px solid ${colors.border}`,
           display: 'flex', alignItems: 'center', gap: 1.5,
         }}>
+
+
+
+          {/* CAMBIAR URG QUE SE VEA EL TECNICO QUE INICIA SESION NO JUAN MORA */}
           <Avatar sx={{ width: 30, height: 30, bgcolor: '#1e3a5f', fontSize: 11, fontWeight: 500, color: colors.info }}>
             JM
           </Avatar>
@@ -124,8 +129,16 @@ const TecnicoLayout = ({ children }) => {
             <Typography sx={{ fontSize: 12, color: colors.textMain, fontWeight: 500 }}>Juan Mora</Typography>
             <Typography sx={{ fontSize: 10, color: colors.textFaint }}>Administrador</Typography>
           </Box>
-        </Box>
-      </Drawer>
+          <Tooltip title="Cerrar sesión">
+            <IconButton size="small" sx={{ color: colors.danger }} onClick={() => { localStorage.removeItem('usuario'); navigate('/login');}}>
+              <LogoutIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+          </Tooltip>
+          </Box>
+          </Drawer>
+
+
+
 
       {/* ── Main ── */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

@@ -56,6 +56,7 @@ export const primaryBtn = {
   fontWeight:      500,
   fontSize:        13,
   borderRadius:    '7px',
+  color:          colors.textMain,
   '&:hover': { bgcolor: colors.primaryHover },
 };
 

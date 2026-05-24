@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, AppBar, Toolbar, IconButton,
-  Badge, Avatar, Chip
+  Badge, Avatar, Chip, Tooltip
 } from '@mui/material';
 import DashboardIcon     from '@mui/icons-material/Dashboard';
 import BuildIcon         from '@mui/icons-material/Build';
@@ -12,6 +12,7 @@ import EngineeringIcon   from '@mui/icons-material/Engineering';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
 import { colors } from '../../../utils/styles';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const DRAWER_WIDTH = 230;
 
@@ -132,6 +133,12 @@ const AdminLayout = ({ children }) => {
             <Typography sx={{ fontSize: 12, color: colors.textMain, fontWeight: 500 }}>Juan Mora</Typography>
             <Typography sx={{ fontSize: 10, color: colors.textFaint }}>Administrador</Typography>
           </Box>
+          <Tooltip title="Cerrar sesión">
+            <IconButton size="small" sx={{ color: colors.danger }} onClick={() => { localStorage.removeItem('usuario'); navigate('/login');
+            }}>
+              <LogoutIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Drawer>
 

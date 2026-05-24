@@ -7,10 +7,16 @@ import ReparacionesAdmin from './components/admin/pages/ReparacionesAdmin';
 import ClientesAdmin from './components/admin/pages/ClientesAdmin';
 import RepuestosAdmin from './components/admin/pages/RepuestosAdmin';
 import TecnicosAdmin from './components/admin/pages/TecnicosAdmin';
-
+import Login from './components/auth/Login';
+import BusquedaPublica from './components/cliente/BusquedaPublica';
 function App() {
   return (
     <Routes>
+      {/* Página pública */}
+      <Route path="/" element={<BusquedaPublica />} />
+      
+      {/* Login */}
+      <Route path="/login" element={<Login />} />
 
       {/* ADMIN */}
       <Route path="/admin/*" element={
@@ -37,7 +43,7 @@ function App() {
       } />
 
       {/* Ruta por defecto */}
-      <Route path="*" element={<Navigate to="/admin/dashboard" />} />
+      <Route path="*" element={<Navigate to="/" />} />
 
     </Routes>
   );
