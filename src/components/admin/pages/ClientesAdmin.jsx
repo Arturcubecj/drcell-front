@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box, Typography, Modal, TextField, Grid,
-  IconButton, Tooltip, Divider
+  IconButton, Tooltip, Divider, CircularProgress
 } from '@mui/material';
 import AddIcon    from '@mui/icons-material/Add';
 import EditIcon   from '@mui/icons-material/Edit';
@@ -11,15 +11,7 @@ import InfoIcon   from '@mui/icons-material/Info';
 import DataTable    from '../../DataTable';
 import ActionButton from '../../Boton';
 import { colors, cardStyle, inputStyle } from '../../../utils/styles';
-
-// ── Datos de ejemplo ───────────────────────────────────────────
-const dataInicial = [
-  { id: 'CLT-001', cedula: '0912345678', nombre: 'Carlos Vega',  telefono: '0991234567', correo: 'carlos@gmail.com',  direccion: 'Av. 9 de Octubre 123' },
-  { id: 'CLT-002', cedula: '0923456789', nombre: 'Ana Morales',  telefono: '0982345678', correo: 'ana@gmail.com',     direccion: 'Cdla. Kennedy Norte' },
-  { id: 'CLT-003', cedula: '0934567890', nombre: 'Diego Saltos', telefono: '0973456789', correo: 'diego@gmail.com',   direccion: 'Urdesa Central Mz. 5' },
-  { id: 'CLT-004', cedula: '0945678901', nombre: 'María Paz',    telefono: '0964567890', correo: 'maria@gmail.com',   direccion: 'Los Ceibos Calle 7' },
-  { id: 'CLT-005', cedula: '0956789012', nombre: 'Roberto Loor', telefono: '0955678901', correo: 'roberto@gmail.com', direccion: 'Alborada 8va Etapa' },
-];
+import { obtenerClientesService, crearClienteService, actualizarClienteService, eliminarClienteService } from '../../../services/clientesServices';
 
 const campoVacio = { cedula: '', nombre: '', telefono: '', correo: '', direccion: '' };
 
@@ -29,9 +21,9 @@ const modalStyle = {
   width: 500, ...cardStyle, p: 3, outline: 'none', borderRadius: '12px',
 };
 
-// ── Componente principal ───────────────────────────────────────
 const ClientesAdmin = () => {
-  const [rows, setRows]                   = useState(dataInicial);
+  const [rows, setRows]                   = useState([]);
+  const [loading, setLoading]             = useState(true);
   const [modalNuevo, setModalNuevo]       = useState(false);
   const [modalInfo, setModalInfo]         = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
@@ -39,27 +31,53 @@ const ClientesAdmin = () => {
   const [form, setForm]                   = useState(campoVacio);
   const [modoEditar, setModoEditar]       = useState(false);
 
+  // ── Cargar clientes al montar ──
+  useEffect(() => {
+    cargarClientes();
+  }, []);
+
+  const cargarClientes = async () => {
+    try {
+      setLoading(true);
+      const response = await obtenerClientesService();
+      setRows(response.data);
+    } catch (error) {
+      console.error('Error al cargar clientes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Abrir modales ──
-  const abrirNuevo = () => { setForm(campoVacio); setModoEditar(false); setModalNuevo(true); };
-  const abrirEditar = (row) => { setForm({ ...row }); setModoEditar(true); setModalNuevo(true); };
-  const abrirInfo = (row) => { setSeleccionado(row); setModalInfo(true); };
+  const abrirNuevo    = () => { setForm(campoVacio); setModoEditar(false); setModalNuevo(true); };
+  const abrirEditar   = (row) => { setForm({ ...row }); setModoEditar(true); setModalNuevo(true); };
+  const abrirInfo     = (row) => { setSeleccionado(row); setModalInfo(true); };
   const abrirEliminar = (row) => { setSeleccionado(row); setModalEliminar(true); };
 
   // ── Guardar (nuevo o editar) ──
-  const guardar = () => {
-    if (modoEditar) {
-      setRows(rows.map(r => r.id === form.id ? { ...form } : r));
-    } else {
-      const nuevoId = `CLT-00${rows.length + 1}`;
-      setRows([...rows, { id: nuevoId, ...form }]);
+  const guardar = async () => {
+    try {
+      if (modoEditar) {
+        await actualizarClienteService(form.id, form);
+      } else {
+        await crearClienteService(form);
+      }
+      setModalNuevo(false);
+      cargarClientes();
+    } catch (error) {
+      console.error('Error al guardar cliente:', error);
     }
-    setModalNuevo(false);
   };
 
   // ── Eliminar ──
-  const eliminar = () => {
-    setRows(rows.filter(r => r.id !== seleccionado.id));
-    setModalEliminar(false);
+  const eliminar = async () => {
+    try {
+      await eliminarClienteService(seleccionado.id);
+      setModalEliminar(false);
+      cargarClientes();
+    } catch (error) {
+      console.error('Error al eliminar cliente:', error);
+    }
   };
 
   const handleForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -84,6 +102,15 @@ const ClientesAdmin = () => {
       </Tooltip>
     </Box>
   );
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <CircularProgress sx={{ color: colors.primary }} />
+      </Box>
+    );
+  }
+
   return (
     <Box>
       {/* Botón nuevo cliente */}
@@ -101,6 +128,7 @@ const ClientesAdmin = () => {
         nameKey="nombre"
         renderAction={acciones}
       />
+
       {/* ── Modal Nuevo / Editar ── */}
       <Modal open={modalNuevo} onClose={() => setModalNuevo(false)}>
         <Box sx={modalStyle}>
@@ -135,6 +163,7 @@ const ClientesAdmin = () => {
           </Box>
         </Box>
       </Modal>
+
       {/* ── Modal Más información ── */}
       <Modal open={modalInfo} onClose={() => setModalInfo(false)}>
         <Box sx={modalStyle}>
@@ -185,4 +214,5 @@ const ClientesAdmin = () => {
     </Box>
   );
 };
+
 export default ClientesAdmin;

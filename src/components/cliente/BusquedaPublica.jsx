@@ -16,13 +16,7 @@ import ActionButton from '../Boton';
 import StatusChip   from '../StatusChip';
 import { colors, cardStyle, inputStyle } from '../../utils/styles';
 
-// ── Datos de ejemplo (luego vendrán del backend) ───────────────
-const reparaciones = [
-  { codigo: '#REP-1048', equipo: 'iPhone 14 Pro',  falla: 'Pantalla rota',    tecnico: 'Luis Torres',  estado: 'En reparación',   entrega: '2 días' },
-  { codigo: '#REP-1047', equipo: 'Samsung S23',    falla: 'Batería agotada',  tecnico: 'Pedro Granda', estado: 'Lista',           entrega: 'Hoy' },
-  { codigo: '#REP-1046', equipo: 'Xiaomi 12T',     falla: 'No carga',         tecnico: 'Luis Torres',  estado: 'Diagnóstico',     entrega: '3 días' },
-  { codigo: '#REP-1045', equipo: 'Motorola G82',   falla: 'No enciende',      tecnico: 'Sin asignar',  estado: 'Pendiente',       entrega: 'Por definir' },
-];
+import {obtenerReparacionByCodigoService} from '../../services/reparacionesServices.js';
 
 // ── Pasos del progreso según estado ───────────────────────────
 const pasos = ['Recibido', 'Diagnóstico', 'Reparación', 'Control calidad', 'Listo para retiro'];
@@ -42,15 +36,16 @@ const BusquedaPublica = () => {
   const [resultado, setResultado] = useState(null);
   const [error, setError]         = useState('');
 
-  const buscar = () => {
+  const buscar = async () => {
     setError('');
     setResultado(null);
-    const found = reparaciones.find(r => r.codigo.toLowerCase() === codigo.toLowerCase());
-    if (!found) {
+    if(!codigo.trim()) return;
+    try{
+      const response = await obtenerReparacionByCodigoService(codigo.trim());
+      setResultado(response.data);
+    }catch(error){
       setError('No encontramos un equipo con ese código. Verifica e intenta de nuevo.');
-      return;
     }
-    setResultado(found);
     setCodigo(''); // Limpiar input después de la búsqueda
   };
 
@@ -74,7 +69,7 @@ const BusquedaPublica = () => {
           </Box>
           <Box>
             <Typography sx={{ fontSize: 14, fontWeight: 500, color: colors.textMain }}>DrCell</Typography>
-            <Typography sx={{ fontSize: 11, color: colors.textFaint }}>Reparación de celulares</Typography>
+            <Typography sx={{ fontSize: 11, color: colors.textFaint}}>Reparación de celulares</Typography>
           </Box>
         </Box>
         <ActionButton
@@ -150,7 +145,7 @@ const BusquedaPublica = () => {
                   {resultado.equipo}
                 </Typography>
                 <Typography sx={{ fontSize: 11, color: colors.textFaint, mt: 0.3 }}>
-                  Técnico: {resultado.tecnico} · Est. entrega: {resultado.entrega}
+                  Técnico: {resultado.tecnico ?? 'Sin Asignar'} · Est. entrega: {resultado.fecha_entrega_estimada ? new Date(resultado.fecha_entrega_estimada).toLocaleDateString('es-EC'): 'Por definir'}
                 </Typography>
               </Box>
               <StatusChip label={resultado.estado} />

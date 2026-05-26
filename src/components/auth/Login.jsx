@@ -14,12 +14,7 @@ import InfoIcon          from '@mui/icons-material/Info';
 import ActionButton from '../Boton';
 import { colors, inputStyle, cardStyle } from '../../utils/styles';
 
-// ── Usuarios hardcodeados (luego vendrán del backend) ──────────
-const usuarios = [
-  { correo: 'juan@drcell.com',  password: 'admin123',  rol: 'admin',   nombre: 'Juan Mora' },
-  { correo: 'luis@drcell.com',  password: 'tec123',    rol: 'tecnico', nombre: 'Luis Torres' },
-  { correo: 'pedro@drcell.com', password: 'tec123',    rol: 'tecnico', nombre: 'Pedro Granda' },
-];
+import { loginService } from '../../services/authServices.js';;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,25 +23,20 @@ const Login = () => {
   const [password, setPassword]               = useState('');
   const [error, setError]                     = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
-    const usuario = usuarios.find(
-      u => u.correo === correo && u.password === password && u.rol === rolSeleccionado
-    );
-
-    if (!usuario) {
+    try{
+      const response = await loginService(correo, password, rolSeleccionado);
+      // Guardar Sesion
+      localStorage.setItem('usuario', JSON.stringify(response.data));
+      // Redirigir según rol
+      if (response.data.rol === 'admin'){
+        navigate('/admin/dashboard');
+      }else{
+        navigate('/tecnico/dashboard');
+      }
+    }catch(error){
       setError('Correo, contraseña o perfil incorrecto.');
-      return;
-    }
-
-    // Guardar sesión (luego será JWT del backend)
-    localStorage.setItem('usuario', JSON.stringify(usuario));
-
-    // Redirigir según rol
-    if (usuario.rol === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/tecnico/dashboard');
     }
   };
 

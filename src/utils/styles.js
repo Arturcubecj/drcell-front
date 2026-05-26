@@ -73,4 +73,6 @@ export const inputStyle = {
   },
   '& .MuiInputLabel-root': { color: colors.textFaint, fontSize: 13 },
   '& .MuiInputLabel-root.Mui-focused': { color: colors.primary },
+  '& .MuiInputLabel-shrink': { color: colors.textFaint, fontSize: 14, transform: 'translate(14px, -9px) scale(0.85)' },
+  
 };

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box, Typography, Modal, TextField, Grid,
-  IconButton, Tooltip, Divider
+  IconButton, Tooltip, Divider, CircularProgress
 } from '@mui/material';
 import AddIcon    from '@mui/icons-material/Add';
 import EditIcon   from '@mui/icons-material/Edit';
@@ -11,16 +11,7 @@ import InfoIcon   from '@mui/icons-material/Info';
 import DataTable    from '../../DataTable';
 import ActionButton from '../../Boton';
 import { colors, cardStyle, inputStyle } from '../../../utils/styles';
-
-// ── Datos de ejemplo ───────────────────────────────────────────
-const dataInicial = [
-  { id: 'REP-001', nombre: 'Pantalla OLED',      compatibilidad: 'iPhone 14 Pro',  stock: 3,  precio: '$120.00' },
-  { id: 'REP-002', nombre: 'Batería 4500mAh',    compatibilidad: 'Samsung S23',    stock: 5,  precio: '$35.00'  },
-  { id: 'REP-003', nombre: 'Módulo cámara',       compatibilidad: 'Xiaomi 12T',     stock: 2,  precio: '$55.00'  },
-  { id: 'REP-004', nombre: 'Conector de carga',   compatibilidad: 'Motorola G82',   stock: 8,  precio: '$15.00'  },
-  { id: 'REP-005', nombre: 'Pantalla LCD',        compatibilidad: 'Redmi Note 12',  stock: 0,  precio: '$45.00'  },
-  { id: 'REP-006', nombre: 'Batería 3500mAh',     compatibilidad: 'iPhone 13',      stock: 4,  precio: '$40.00'  },
-];
+import { obtenerRepuestosService, crearRepuestoService, actualizarRepuestoService, eliminarRepuestoService } from '../../../services/repuestosServices.js';
 
 const campoVacio = { nombre: '', compatibilidad: '', stock: '', precio: '' };
 
@@ -30,9 +21,9 @@ const modalStyle = {
   width: 500, ...cardStyle, p: 3, outline: 'none', borderRadius: '12px',
 };
 
-// ── Componente principal ───────────────────────────────────────
 const RepuestosAdmin = () => {
-  const [rows, setRows]                   = useState(dataInicial);
+  const [rows, setRows]                   = useState([]);
+  const [loading, setLoading]             = useState(true);
   const [modalNuevo, setModalNuevo]       = useState(false);
   const [modalInfo, setModalInfo]         = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
@@ -40,32 +31,51 @@ const RepuestosAdmin = () => {
   const [form, setForm]                   = useState(campoVacio);
   const [modoEditar, setModoEditar]       = useState(false);
 
-  // ── Abrir modales ──
+  useEffect(() => { cargarRepuestos(); }, []);
+
+  const cargarRepuestos = async () => {
+    try {
+      setLoading(true);
+      const response = await obtenerRepuestosService();
+      setRows(response.data);
+    } catch (error) {
+      console.error('Error al cargar repuestos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const abrirNuevo    = () => { setForm(campoVacio); setModoEditar(false); setModalNuevo(true); };
   const abrirEditar   = (row) => { setForm({ ...row }); setModoEditar(true); setModalNuevo(true); };
   const abrirInfo     = (row) => { setSeleccionado(row); setModalInfo(true); };
   const abrirEliminar = (row) => { setSeleccionado(row); setModalEliminar(true); };
 
-  // ── Guardar ──
-  const guardar = () => {
-    if (modoEditar) {
-      setRows(rows.map(r => r.id === form.id ? { ...form } : r));
-    } else {
-      const nuevoId = `REP-00${rows.length + 1}`;
-      setRows([...rows, { id: nuevoId, ...form }]);
+  const guardar = async () => {
+    try {
+      if (modoEditar) {
+        await actualizarRepuestoService(form.id, form);
+      } else {
+        await crearRepuestoService(form);
+      }
+      setModalNuevo(false);
+      cargarRepuestos();
+    } catch (error) {
+      console.error('Error al guardar repuesto:', error);
     }
-    setModalNuevo(false);
   };
 
-  // ── Eliminar ──
-  const eliminar = () => {
-    setRows(rows.filter(r => r.id !== seleccionado.id));
-    setModalEliminar(false);
+  const eliminar = async () => {
+    try {
+      await eliminarRepuestoService(seleccionado.id);
+      setModalEliminar(false);
+      cargarRepuestos();
+    } catch (error) {
+      console.error('Error al eliminar repuesto:', error);
+    }
   };
 
   const handleForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ── Acciones por fila ──
   const acciones = (row) => (
     <Box sx={{ display: 'flex', gap: 0.5 }}>
       <Tooltip title="Más información">
@@ -86,15 +96,20 @@ const RepuestosAdmin = () => {
     </Box>
   );
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <CircularProgress sx={{ color: colors.primary }} />
+      </Box>
+    );
+  }
+
   return (
     <Box>
-
-      {/* Botón nuevo repuesto */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
         <ActionButton label="Nuevo repuesto" icon={<AddIcon />} onClick={abrirNuevo} />
       </Box>
 
-      {/* Tabla */}
       <DataTable
         title="Inventario de repuestos"
         columns={['ID', 'Nombre', 'Compatibilidad', 'Stock', 'Precio', 'Acción']}
@@ -105,7 +120,6 @@ const RepuestosAdmin = () => {
         renderAction={acciones}
       />
 
-      {/* ── Modal Nuevo / Editar ── */}
       <Modal open={modalNuevo} onClose={() => setModalNuevo(false)}>
         <Box sx={modalStyle}>
           <Typography sx={{ fontSize: 15, fontWeight: 500, color: colors.textMain, mb: 2.5 }}>
@@ -126,7 +140,7 @@ const RepuestosAdmin = () => {
             </Grid>
             <Grid item xs={6}>
               <TextField fullWidth label="Precio" name="precio" value={form.precio}
-                onChange={handleForm} sx={inputStyle} placeholder="$0.00" />
+                onChange={handleForm} sx={inputStyle} placeholder="0.00" />
             </Grid>
           </Grid>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 3 }}>
@@ -136,7 +150,6 @@ const RepuestosAdmin = () => {
         </Box>
       </Modal>
 
-      {/* ── Modal Más información ── */}
       <Modal open={modalInfo} onClose={() => setModalInfo(false)}>
         <Box sx={modalStyle}>
           <Typography sx={{ fontSize: 15, fontWeight: 500, color: colors.textMain, mb: 2 }}>
@@ -146,11 +159,11 @@ const RepuestosAdmin = () => {
           {seleccionado && (
             <Grid container spacing={1.5}>
               {[
-                { label: 'ID',              value: seleccionado.id },
-                { label: 'Nombre',          value: seleccionado.nombre },
-                { label: 'Compatibilidad',  value: seleccionado.compatibilidad },
-                { label: 'Stock',           value: seleccionado.stock },
-                { label: 'Precio',          value: seleccionado.precio },
+                { label: 'ID',             value: seleccionado.id },
+                { label: 'Nombre',         value: seleccionado.nombre },
+                { label: 'Compatibilidad', value: seleccionado.compatibilidad },
+                { label: 'Stock',          value: seleccionado.stock },
+                { label: 'Precio',         value: seleccionado.precio },
               ].map(({ label, value }) => (
                 <Grid item xs={6} key={label}>
                   <Typography sx={{ fontSize: 11, color: colors.textFaint, mb: 0.5 }}>{label}</Typography>
@@ -165,7 +178,6 @@ const RepuestosAdmin = () => {
         </Box>
       </Modal>
 
-      {/* ── Modal Eliminar ── */}
       <Modal open={modalEliminar} onClose={() => setModalEliminar(false)}>
         <Box sx={{ ...modalStyle, width: 380 }}>
           <Typography sx={{ fontSize: 15, fontWeight: 500, color: colors.textMain, mb: 1 }}>

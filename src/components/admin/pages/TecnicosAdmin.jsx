@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { CircularProgress } from '@mui/material';
 import {
   Box, Typography, Modal, TextField, Grid,
   IconButton, Tooltip, Divider
@@ -12,15 +13,9 @@ import DataTable    from '../../DataTable';
 import ActionButton from '../../Boton';
 import { colors, cardStyle, inputStyle } from '../../../utils/styles';
 
-// ── Datos de ejemplo ───────────────────────────────────────────
-const dataInicial = [
-  { id: 'TEC-001', nombre: 'Luis Torres',  telefono: '0991234567', correo: 'luis@drcell.com',   especialidad: 'iPhone / iOS' },
-  { id: 'TEC-002', nombre: 'Pedro Granda', telefono: '0982345678', correo: 'pedro@drcell.com',  especialidad: 'Samsung / Android' },
-  { id: 'TEC-003', nombre: 'Sofía Reyes',  telefono: '0973456789', correo: 'sofia@drcell.com',  especialidad: 'Xiaomi / Motorola' },
-  { id: 'TEC-004', nombre: 'Marco Leal',   telefono: '0964567890', correo: 'marco@drcell.com',  especialidad: 'Placas / Soldadura' },
-];
+import {obtenerTecnicosService, crearTecnicoService, actualizarTecnicoService, eliminarTecnicoService} from '../../../services/tecnicosServices.js';
 
-const campoVacio = { nombre: '', telefono: '', correo: '', especialidad: '' };
+const campoVacio = { nombre: '', telefono: '', correo: '', password: '', especialidad: '' };
 
 const modalStyle = {
   position: 'absolute', top: '50%', left: '50%',
@@ -30,13 +25,28 @@ const modalStyle = {
 
 // ── Componente principal ───────────────────────────────────────
 const TecnicosAdmin = () => {
-  const [rows, setRows]                   = useState(dataInicial);
+  const [rows, setRows]                   = useState([]);
+  const [loading, setLoading]             = useState(true);
   const [modalNuevo, setModalNuevo]       = useState(false);
   const [modalInfo, setModalInfo]         = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
   const [seleccionado, setSeleccionado]   = useState(null);
   const [form, setForm]                   = useState(campoVacio);
   const [modoEditar, setModoEditar]       = useState(false);
+
+  useEffect(()=> { cargarTecnicos();}, []);
+
+  const cargarTecnicos = async () => {
+    try{
+      setLoading(true);
+      const response = await obtenerTecnicosService();
+      setRows(response.data);
+    }catch(error){
+      console.error('Error al cargar tecnicos: ', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // ── Abrir modales ──
   const abrirNuevo    = () => { setForm(campoVacio); setModoEditar(false); setModalNuevo(true); };
@@ -45,20 +55,29 @@ const TecnicosAdmin = () => {
   const abrirEliminar = (row) => { setSeleccionado(row); setModalEliminar(true); };
 
   // ── Guardar ──
-  const guardar = () => {
-    if (modoEditar) {
-      setRows(rows.map(r => r.id === form.id ? { ...form } : r));
-    } else {
-      const nuevoId = `TEC-00${rows.length + 1}`;
-      setRows([...rows, { id: nuevoId, ...form }]);
-    }
-    setModalNuevo(false);
+  const guardar = async () => {
+    try{
+      if (modoEditar) {
+        await actualizarTecnicoService(form.id, form);
+        } else {
+          await crearTecnicoService(form);
+          }
+          setModalNuevo(false);
+          cargarTecnicos();
+          }catch(error){
+            console.error('Error al guardar tecnico: ', error);
+            }
   };
 
   // ── Eliminar ──
-  const eliminar = () => {
-    setRows(rows.filter(r => r.id !== seleccionado.id));
-    setModalEliminar(false);
+  const eliminar = async () => {
+    try{
+      await eliminarTecnicoService(seleccionado.id);
+      setModalEliminar(false);
+      cargarTecnicos();
+    }catch(error){
+      console.error('Error al eliminar tecnico: ', error);
+    }
   };
 
   const handleForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -83,6 +102,12 @@ const TecnicosAdmin = () => {
       </Tooltip>
     </Box>
   );
+  if (loading){
+    return(<Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+      <CircularProgress sx={{ color: colors.primary }} />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -122,6 +147,8 @@ const TecnicosAdmin = () => {
               <TextField fullWidth label="Correo electrónico" name="correo" value={form.correo}
                 onChange={handleForm} sx={inputStyle} />
             </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="Contraseña" name="password" type="password" value={form.password} onChange={handleForm} sx={inputStyle} /></Grid>
             <Grid item xs={6}>
               <TextField fullWidth label="Especialidad" name="especialidad" value={form.especialidad}
                 onChange={handleForm} sx={inputStyle} />

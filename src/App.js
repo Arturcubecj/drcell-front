@@ -9,6 +9,7 @@ import RepuestosAdmin from './components/admin/pages/RepuestosAdmin';
 import TecnicosAdmin from './components/admin/pages/TecnicosAdmin';
 import Login from './components/auth/Login';
 import BusquedaPublica from './components/cliente/BusquedaPublica';
+import FacturasAdmin from './components/admin/pages/FacturasAdmin';
 function App() {
   return (
     <Routes>
@@ -27,6 +28,7 @@ function App() {
             <Route path="clientes" element={<ClientesAdmin />} />
             <Route path="repuestos" element={<RepuestosAdmin />} /> 
             <Route path="tecnicos" element={<TecnicosAdmin />} />
+            <Route path="facturas" element={<FacturasAdmin />} />
             <Route path="*" element={<Navigate to="dashboard" />} />
           </Routes>
         </AdminLayout>

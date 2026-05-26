@@ -11,6 +11,7 @@ import InventoryIcon     from '@mui/icons-material/Inventory';
 import EngineeringIcon   from '@mui/icons-material/Engineering';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
+import ReceiptIcon       from '@mui/icons-material/Receipt';
 import { colors } from '../../../utils/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
 
@@ -22,6 +23,7 @@ const navItems = [
   { label: 'Clientes',     icon: <PeopleIcon />,      path: '/admin/clientes' },
   { label: 'Repuestos',    icon: <InventoryIcon />,   path: '/admin/repuestos' },
   { label: 'Técnicos',     icon: <EngineeringIcon />, path: '/admin/tecnicos' },
+  { label: 'Facturas',     icon: <ReceiptIcon />,     path: '/admin/facturas' },
 ];
 
 const AdminLayout = ({ children }) => {

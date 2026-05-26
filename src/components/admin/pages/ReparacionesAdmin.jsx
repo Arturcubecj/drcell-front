@@ -1,70 +1,126 @@
- import {useState } from 'react';
-import{
-    Box, Typography, Modal, TextField, Grid, MenuItem, IconButton, Tooltip, Divider
+import { useState, useEffect } from 'react';
+import {
+  Box, Typography, Modal, TextField, Grid, MenuItem,
+  IconButton, Tooltip, Divider, CircularProgress
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import AddIcon    from '@mui/icons-material/Add';
+import EditIcon   from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import InfoIcon from '@mui/icons-material/Info';
-import DataTable from '../../DataTable';
+import InfoIcon   from '@mui/icons-material/Info';
+
+import DataTable    from '../../DataTable';
 import ActionButton from '../../Boton';
-import StatusChip from '../../StatusChip';
+import StatusChip   from '../../StatusChip';
 import { colors, cardStyle, inputStyle } from '../../../utils/styles';
-// ──────────────Datos de ejemplo────────────────
-const dataInicial = [
-  { codigo: '#REP-1048', cliente: 'Carlos Vega',  equipo: 'iPhone 14 Pro', tecnico: 'Luis T.',     estado: 'En reparación', nota: 'Pantalla rota por caída' },
-  { codigo: '#REP-1047', cliente: 'Ana Morales',  equipo: 'Samsung S23',   tecnico: 'Pedro G.',    estado: 'Lista',         nota: 'Batería agotada, reemplazada' },
-  { codigo: '#REP-1046', cliente: 'Diego Saltos', equipo: 'Xiaomi 12T',    tecnico: 'Luis T.',     estado: 'Diagnóstico',   nota: 'No carga, revisando placa' },
-  { codigo: '#REP-1045', cliente: 'María Paz',    equipo: 'Motorola G82',  tecnico: 'Sin asignar', estado: 'Pendiente',     nota: 'No enciende' },
-  { codigo: '#REP-1044', cliente: 'Roberto Loor', equipo: 'iPhone 13',     tecnico: 'Pedro G.',    estado: 'En reparación', nota: 'Cámara trasera dañada' },
-];
+import {
+  obtenerReparacionesService,
+  crearReparacionService,
+  actualizarReparacionService,
+  eliminarReparacionService
+} from '../../../services/reparacionesServices.js';
+import { obtenerTecnicosService } from '../../../services/tecnicosServices.js';
+import { obtenerClientesService }  from '../../../services/clientesServices.js';
 
 const estados = ['Pendiente', 'Diagnóstico', 'En reparación', 'Control calidad', 'Lista'];
-const tecnicos = ['Luis T.', 'Pedro G.', 'Sofía R.', 'Marco L.', 'Sin asignar'];
 
 const modalStyle = {
   position: 'absolute', top: '50%', left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 500, ...cardStyle, p: 3, outline: 'none', borderRadius: '12px',
+  maxHeight: '80vh',
+  overflow: 'auto',
+  width: 600, ...cardStyle, p: 3, outline: 'none', borderRadius: '12px',
 };
 
-const campoVacio = { codigo: '', cliente: '', equipo: '', tecnico: '', estado: 'Pendiente', nota: '' };
-// ── Componente principal ───────────────────────────────────────
-const Reparaciones = () => {
-  const [rows, setRows]               = useState(dataInicial);
-  const [modalNuevo, setModalNuevo]   = useState(false);
-  const [modalInfo, setModalInfo]     = useState(false);
+const campoVacio = {
+  codigo: '', cliente_id: '', equipo: '',
+  tecnico_id: '', estado: 'Pendiente', nota: '',
+  precio_servicio: 0, precio_repuestos: 0,
+  fecha_entrega_estimada: '', garantia_dias: 30
+};
+
+const ReparacionesAdmin = () => {
+  const [rows, setRows]                   = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [tecnicos, setTecnicos]           = useState([]);
+  const [clientes, setClientes]           = useState([]);
+  const [modalNuevo, setModalNuevo]       = useState(false);
+  const [modalInfo, setModalInfo]         = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
   const [seleccionado, setSeleccionado]   = useState(null);
-  const [form, setForm]               = useState(campoVacio);
-  const [modoEditar, setModoEditar]   = useState(false);
- 
-  
+  const [form, setForm]                   = useState(campoVacio);
+  const [modoEditar, setModoEditar]       = useState(false);
+
+  // ── Cargar datos al montar ──
+  useEffect(() => { cargarDatos(); }, []);
+
+  const cargarDatos = async () => {
+    try {
+      setLoading(true);
+      const [reps, tecs, clts] = await Promise.all([
+        obtenerReparacionesService(),
+        obtenerTecnicosService(),
+        obtenerClientesService()
+      ]);
+      setRows(reps.data);
+      setTecnicos(tecs.data);
+      setClientes(clts.data);
+    } catch (error) {
+      console.error('Error al cargar datos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Abrir modales ──
-  const abrirNuevo = () => { setForm(campoVacio); setModoEditar(false); setModalNuevo(true); };
-  const abrirEditar = (row) => { setForm({ ...row }); setModoEditar(true); setModalNuevo(true); };
-  const abrirInfo = (row) => { setSeleccionado(row); setModalInfo(true); };
+  const abrirNuevo = () => { const numeros = rows.map(r => parseInt(r.codigo.replace('#REP-', ''))); const maximo = numeros.length > 0 ? Math.max(...numeros) : 1040;  const nuevocodigo = `#REP-${maximo + 1}`;
+  setForm({ ...campoVacio, codigo: nuevocodigo });
+  setModoEditar(false);
+  setModalNuevo(true);
+};
+  const abrirEditar = (row) => { setForm({ ...row, cliente_id: row.cliente_id || '', tecnico_id: row.tecnico_id || '', fecha_entrega_estimada: row.fecha_entrega_estimada ? row.fecha_entrega_estimada.split('T')[0] : '',});
+  setModoEditar(true);
+  setModalNuevo(true);
+};
+  const abrirInfo     = (row) => { setSeleccionado(row); setModalInfo(true); };
   const abrirEliminar = (row) => { setSeleccionado(row); setModalEliminar(true); };
- 
-  // ── Guardar (nuevo o editar) ──
-  const guardar = () => {
+
+  // ── Guardar ──
+const guardar = async () => {
+  try {
+    const data = {
+      ...form,
+      cliente_id: parseInt(form.cliente_id),
+      tecnico_id: form.tecnico_id ? parseInt(form.tecnico_id) : null,
+      precio_servicio: parseFloat(form.precio_servicio),
+      precio_repuestos: parseFloat(form.precio_repuestos),
+      garantia_dias: parseInt(form.garantia_dias),
+    };
     if (modoEditar) {
-      setRows(rows.map(r => r.codigo === form.codigo ? { ...form } : r));
+      await actualizarReparacionService(form.id, data);
     } else {
-      setRows([...rows, { ...form }]);
+      await crearReparacionService(data);
     }
     setModalNuevo(false);
-  };
- 
+    cargarDatos();
+  } catch (error) {
+    console.error('Error al guardar reparación:', error);
+  }
+};
+
   // ── Eliminar ──
-  const eliminar = () => {
-    setRows(rows.filter(r => r.codigo !== seleccionado.codigo));
-    setModalEliminar(false);
+  const eliminar = async () => {
+    try {
+      await eliminarReparacionService(seleccionado.id);
+      setModalEliminar(false);
+      cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar reparación:', error);
+    }
   };
- 
+
   const handleForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
- 
-  // ── Columnas de acción ──
+
+  // ── Acciones por fila ──
   const acciones = (row) => (
     <Box sx={{ display: 'flex', gap: 0.5 }}>
       <Tooltip title="Más información">
@@ -84,15 +140,23 @@ const Reparaciones = () => {
       </Tooltip>
     </Box>
   );
- 
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <CircularProgress sx={{ color: colors.primary }} />
+      </Box>
+    );
+  }
+
   return (
     <Box>
- 
+
       {/* Botón nueva reparación */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
         <ActionButton label="Nueva reparación" icon={<AddIcon />} onClick={abrirNuevo} />
       </Box>
- 
+
       {/* Tabla */}
       <DataTable
         title="Todas las reparaciones"
@@ -104,7 +168,7 @@ const Reparaciones = () => {
         statusKey="estado"
         renderAction={acciones}
       />
- 
+
       {/* ── Modal Nueva / Editar ── */}
       <Modal open={modalNuevo} onClose={() => setModalNuevo(false)}>
         <Box sx={modalStyle}>
@@ -114,42 +178,82 @@ const Reparaciones = () => {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TextField fullWidth label="Código" name="codigo" value={form.codigo}
-                onChange={handleForm} sx={inputStyle} disabled={modoEditar} />
+                onChange={handleForm} sx={inputStyle} disabled={modoEditar} InputLabelProps={{ shrink: true }}/>
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth label="Cliente" name="cliente" value={form.cliente}
-                onChange={handleForm} sx={inputStyle} />
+              {/* Cliente desde la BD */}
+              <TextField select fullWidth label="Cliente" name="cliente_id"
+                value={form.cliente_id} onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}>
+                {clientes.map(c => (
+                  <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>
+                ))}
+              </TextField>
             </Grid>
             <Grid item xs={6}>
               <TextField fullWidth label="Equipo" name="equipo" value={form.equipo}
-                onChange={handleForm} sx={inputStyle} />
+                onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}/>
             </Grid>
             <Grid item xs={6}>
-              <TextField select fullWidth label="Técnico" name="tecnico" value={form.tecnico}
-                onChange={handleForm} sx={inputStyle}>
-                {tecnicos.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              {/* Técnico desde la BD */}
+              <TextField select fullWidth label="Técnico" name="tecnico_id"
+                value={form.tecnico_id} onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}>
+                <MenuItem value="">Sin asignar</MenuItem>
+                {tecnicos.map(t => (
+                  <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
+                ))}
               </TextField>
             </Grid>
             <Grid item xs={6}>
-              <TextField select fullWidth label="Estado" name="estado" value={form.estado}
-                onChange={handleForm} sx={inputStyle}>
+              <TextField select fullWidth label="Estado" name="estado"
+                value={form.estado} onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}>
                 {estados.map(e => <MenuItem key={e} value={e}>{e}</MenuItem>)}
               </TextField>
             </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="Precio servicio" name="precio_servicio"
+                type="number" value={form.precio_servicio}
+                onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}/>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="Precio repuestos" name="precio_repuestos"
+                type="number" value={form.precio_repuestos}
+                onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}/>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="Entrega estimada" name="fecha_entrega_estimada"
+                type="date" value={form.fecha_entrega_estimada}
+                onChange={handleForm}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  ...inputStyle,
+                  '& .MuiInputLabel-root': { 
+                    color: colors.textFaint, 
+                    fontSize: 13,
+                    transform: 'translate(14px, -9px) scale(0.75)',
+                  },
+                  '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter: 'invert(1)',  // ← esto pone el icono del calendario en blanco
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="Garantia dias" name="garantia_dias"
+                type="number" value={form.garantia_dias}
+                onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}/>
+            </Grid>
             <Grid item xs={12}>
               <TextField fullWidth multiline rows={3} label="Nota de falla" name="nota"
-                value={form.nota} onChange={handleForm} sx={inputStyle} />
+                value={form.nota} onChange={handleForm} sx={inputStyle} InputLabelProps={{ shrink: true }}/>
             </Grid>
           </Grid>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 3 }}>
-            <ActionButton label="Cancelar" variant="outlined"
-              onClick={() => setModalNuevo(false)} />
-            <ActionButton label={modoEditar ? 'Guardar cambios' : 'Crear reparación'}
-              onClick={guardar} />
+            <ActionButton label="Cancelar" variant="outlined" onClick={() => setModalNuevo(false)} />
+            <ActionButton label={modoEditar ? 'Guardar cambios' : 'Crear reparación'} onClick={guardar} />
           </Box>
         </Box>
       </Modal>
- 
+
       {/* ── Modal Más información ── */}
       <Modal open={modalInfo} onClose={() => setModalInfo(false)}>
         <Box sx={modalStyle}>
@@ -160,10 +264,15 @@ const Reparaciones = () => {
           {seleccionado && (
             <Grid container spacing={1.5}>
               {[
-                { label: 'Código',   value: seleccionado.codigo },
-                { label: 'Cliente',  value: seleccionado.cliente },
-                { label: 'Equipo',   value: seleccionado.equipo },
-                { label: 'Técnico',  value: seleccionado.tecnico },
+                { label: 'Código',          value: seleccionado.codigo },
+                { label: 'Cliente',         value: seleccionado.cliente },
+                { label: 'Equipo',          value: seleccionado.equipo },
+                { label: 'Técnico',         value: seleccionado.tecnico },
+                { label: 'Precio servicio', value: `$${seleccionado.precio_servicio}` },
+                { label: 'Precio repuestos',value: `$${seleccionado.precio_repuestos}` },
+                { label: 'Total',           value: `$${seleccionado.total}` },
+                { label: 'Garantia dias',   value: `${seleccionado.garantia_dias} días` },
+                { label: 'Fecha entrega',   value: seleccionado.fecha_entrega_estimada ? new Date(seleccionado.fecha_entrega_estimada).toLocaleDateString('es-EC'): 'No definida' },
               ].map(({ label, value }) => (
                 <Grid item xs={6} key={label}>
                   <Typography sx={{ fontSize: 11, color: colors.textFaint, mb: 0.5 }}>{label}</Typography>
@@ -187,7 +296,7 @@ const Reparaciones = () => {
           </Box>
         </Box>
       </Modal>
- 
+
       {/* ── Modal Eliminar ── */}
       <Modal open={modalEliminar} onClose={() => setModalEliminar(false)}>
         <Box sx={{ ...modalStyle, width: 380 }}>
@@ -204,9 +313,9 @@ const Reparaciones = () => {
           </Box>
         </Box>
       </Modal>
- 
+
     </Box>
   );
 };
- 
-export default Reparaciones;
+
+export default ReparacionesAdmin;

@@ -2,10 +2,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, AppBar, Toolbar, IconButton,
-  Badge, Avatar, Chip, Tooltip
+  Avatar, Chip, Tooltip
 } from '@mui/material';
 import DashboardIcon     from '@mui/icons-material/Dashboard';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { colors } from '../../../utils/styles';
@@ -19,6 +18,8 @@ const navItems = [
 const TecnicoLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const iniciales = usuario.nombre ? usuario.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'TC';
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: colors.bg }}>
@@ -52,7 +53,7 @@ const TecnicoLayout = ({ children }) => {
                 DrCell
               </Typography>
               <Typography sx={{ fontSize: 11, color: colors.textFaint }}>
-                Panel de gestión
+                Panel técnico
               </Typography>
             </Box>
           </Box>
@@ -119,15 +120,13 @@ const TecnicoLayout = ({ children }) => {
           display: 'flex', alignItems: 'center', gap: 1.5,
         }}>
 
-
-
           {/* CAMBIAR URG QUE SE VEA EL TECNICO QUE INICIA SESION NO JUAN MORA */}
-          <Avatar sx={{ width: 30, height: 30, bgcolor: '#1e3a5f', fontSize: 11, fontWeight: 500, color: colors.info }}>
-            JM
+          <Avatar sx={{ width: 30, height: 30, bgcolor: '#1e3a5f', fontSize: 11, fontWeight: 500, color: colors.success }}>
+            {iniciales}
           </Avatar>
-          <Box>
-            <Typography sx={{ fontSize: 12, color: colors.textMain, fontWeight: 500 }}>Juan Mora</Typography>
-            <Typography sx={{ fontSize: 10, color: colors.textFaint }}>Administrador</Typography>
+          <Box sx={{ flex:1 }}>
+            <Typography sx={{ fontSize: 12, color: colors.textMain, fontWeight: 500 }}>{usuario.nombre || 'Técnico'}</Typography>
+            <Typography sx={{ fontSize: 10, color: colors.textFaint }}>Técnico</Typography>
           </Box>
           <Tooltip title="Cerrar sesión">
             <IconButton size="small" sx={{ color: colors.danger }} onClick={() => { localStorage.removeItem('usuario'); navigate('/login');}}>
@@ -154,12 +153,9 @@ const TecnicoLayout = ({ children }) => {
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <IconButton size="small" sx={{ color: colors.textFaint }}>
-                <Badge badgeContent={3} color="error">
-                  <NotificationsIcon sx={{ fontSize: 20 }} />
-                </Badge>
               </IconButton>
-              <Avatar sx={{ width: 'auto', height: 'auto', bgcolor: '#1e3a5f', fontSize: 11, color: colors.info }}>
-                JM
+              <Avatar sx={{ width: 30, height: 30, bgcolor: '#14301a', fontSize: 11, color: colors.success }}>
+                {iniciales}
               </Avatar>
             </Box>
           </Toolbar>
