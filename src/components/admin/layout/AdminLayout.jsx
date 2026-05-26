@@ -2,14 +2,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, AppBar, Toolbar, IconButton,
-  Badge, Avatar, Chip, Tooltip
+  Avatar, Chip, Tooltip
 } from '@mui/material';
 import DashboardIcon     from '@mui/icons-material/Dashboard';
 import BuildIcon         from '@mui/icons-material/Build';
 import PeopleIcon        from '@mui/icons-material/People';
 import InventoryIcon     from '@mui/icons-material/Inventory';
 import EngineeringIcon   from '@mui/icons-material/Engineering';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import PhoneAndroidIcon  from '@mui/icons-material/PhoneAndroid';
 import ReceiptIcon       from '@mui/icons-material/Receipt';
 import { colors } from '../../../utils/styles';
@@ -19,7 +18,7 @@ const DRAWER_WIDTH = 230;
 
 const navItems = [
   { label: 'Dashboard',    icon: <DashboardIcon />,  path: '/admin/dashboard' },
-  { label: 'Reparaciones', icon: <BuildIcon />,       path: '/admin/reparaciones', badge: 12 },
+  { label: 'Reparaciones', icon: <BuildIcon />,       path: '/admin/reparaciones'},
   { label: 'Clientes',     icon: <PeopleIcon />,      path: '/admin/clientes' },
   { label: 'Repuestos',    icon: <InventoryIcon />,   path: '/admin/repuestos' },
   { label: 'Técnicos',     icon: <EngineeringIcon />, path: '/admin/tecnicos' },
@@ -158,9 +157,6 @@ const AdminLayout = ({ children }) => {
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <IconButton size="small" sx={{ color: colors.textFaint }}>
-                <Badge badgeContent={3} color="error">
-                  <NotificationsIcon sx={{ fontSize: 20 }} />
-                </Badge>
               </IconButton>
               <Avatar sx={{ width: 30, height: 30, bgcolor: '#1e3a5f', fontSize: 11, color: colors.info }}>
                 JM
