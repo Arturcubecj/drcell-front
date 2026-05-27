@@ -90,7 +90,7 @@ const DashboardTecnico = () => {
       {/* Tabla */}
       <Box sx={{ mt: 3 }}>
         <DataTable
-          title="Mis reparaciones pendientes"
+          title="Mis reparaciones"
           columns={['Código', 'Cliente', 'Equipo', 'Técnico', 'Estado', 'Acción']}
           columnKeys={['codigo', 'cliente', 'equipo', 'tecnico', 'estado', 'accion']}
           rows={rows}
